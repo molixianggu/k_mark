@@ -12,38 +12,44 @@ pub struct TitlePage;
 impl TitlePage {
     fn setup(mut commands: Commands, texture: Res<TextureAssets>, font: Res<FontAssets>) {
         info!("setup title page");
-        commands.spawn(NodeBundle {
-            ..default()
-        }).with_children(|parent| {
+        commands.spawn((
+            NodeBundle {
+                ..default()
+            },
+            Self,
+        )).with_children(|parent| {
             Self::crate_button::<StartGameButton>(parent, "Start Game", texture.button_background.clone(), font.fira_sans.clone());
             Self::crate_button::<SettingsButton>(parent, "Settings", texture.button_background.clone(), font.fira_sans.clone());
         });
     }
 
-    fn start() {
-        info!("start game !")
+    fn start(mut state: ResMut<NextState<GameState>>) {
+        info!("start game !");
+        state.set(GameState::Game);
     }
 
     fn settings() {
         info!("settings !")
     }
 
-    fn crate_button<T: Component + Default>(mut parent: &mut ChildBuilder, text: &str, texture: Handle<Image>, font: Handle<Font>) {
-        parent.spawn((
-            ButtonBundle {
-                style: Style {
-                    margin: UiRect::all(Val::Px(5.0)),
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    width: Val::Px(200.0),
-                    height: Val::Px(200.0),
+    fn crate_button<T: Component + Default>(parent: &mut ChildBuilder, text: &str, texture: Handle<Image>, font: Handle<Font>) {
+        parent.spawn(
+            (
+                ButtonBundle {
+                    style: Style {
+                        margin: UiRect::all(Val::Px(5.0)),
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        width: Val::Px(200.0),
+                        height: Val::Px(200.0),
+                        ..Default::default()
+                    },
+                    image: UiImage::new(texture.clone()),
                     ..Default::default()
                 },
-                image: UiImage::new(texture.clone()),
-                ..Default::default()
-            },
-            T::default(),
-        )).with_children(|p| {
+                T::default(),
+            ),
+        ).with_children(|p| {
             p.spawn(TextBundle {
                 text: Text::from_section(
                     text,
@@ -62,6 +68,7 @@ impl TitlePage {
         });
     }
 }
+
 
 #[derive(Component, Default)]
 struct StartGameButton;

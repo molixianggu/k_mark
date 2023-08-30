@@ -15,6 +15,7 @@ pub enum GameState {
     Loading,
 
     Title,
+    Game,
 }
 
 impl GameState {

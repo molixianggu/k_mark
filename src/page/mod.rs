@@ -1,9 +1,9 @@
 use bevy::prelude::*;
-use crate::loader::texture::TextureAssets;
 use crate::page::base::Page;
 
 mod base;
 mod title;
+mod game;
 
 pub struct PagePlugin {}
 
@@ -18,11 +18,11 @@ fn init(mut commands: Commands) {
 }
 
 
-
 impl Plugin for PagePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, init);
         title::TitlePage::register(app);
+        game::GamePage::register(app);
     }
 }
 
