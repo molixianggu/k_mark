@@ -1,26 +1,32 @@
-use bevy::prelude::*;
-use crate::GameState;
-use crate::page::base::Page;
 use crate::loader::font::FontAssets;
 use crate::loader::texture::TextureAssets;
-use crate::systems::button::{on_click, button_state};
+use crate::page::base::Page;
+use crate::systems::button::{button_state, on_click};
+use crate::GameState;
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct TitlePage;
 
-
 impl TitlePage {
     fn setup(mut commands: Commands, texture: Res<TextureAssets>, font: Res<FontAssets>) {
         info!("setup title page");
-        commands.spawn((
-            NodeBundle {
-                ..default()
-            },
-            Self,
-        )).with_children(|parent| {
-            Self::crate_button::<StartGameButton>(parent, "Start Game", texture.button_background.clone(), font.fira_sans.clone());
-            Self::crate_button::<SettingsButton>(parent, "Settings", texture.button_background.clone(), font.fira_sans.clone());
-        });
+        commands
+            .spawn((NodeBundle { ..default() }, Self))
+            .with_children(|parent| {
+                Self::crate_button::<StartGameButton>(
+                    parent,
+                    "Start Game",
+                    texture.button_background.clone(),
+                    font.fira_sans.clone(),
+                );
+                Self::crate_button::<SettingsButton>(
+                    parent,
+                    "Settings",
+                    texture.button_background.clone(),
+                    font.fira_sans.clone(),
+                );
+            });
     }
 
     fn start(mut state: ResMut<NextState<GameState>>) {
@@ -32,9 +38,14 @@ impl TitlePage {
         info!("settings !")
     }
 
-    fn crate_button<T: Component + Default>(parent: &mut ChildBuilder, text: &str, texture: Handle<Image>, font: Handle<Font>) {
-        parent.spawn(
-            (
+    fn crate_button<T: Component + Default>(
+        parent: &mut ChildBuilder,
+        text: &str,
+        texture: Handle<Image>,
+        font: Handle<Font>,
+    ) {
+        parent
+            .spawn((
                 ButtonBundle {
                     style: Style {
                         margin: UiRect::all(Val::Px(5.0)),
@@ -48,31 +59,29 @@ impl TitlePage {
                     ..Default::default()
                 },
                 T::default(),
-            ),
-        ).with_children(|p| {
-            p.spawn(TextBundle {
-                text: Text::from_section(
-                    text,
-                    TextStyle {
-                        font: font.clone(),
-                        font_size: 30.0,
-                        color: Color::DARK_GRAY,
+            ))
+            .with_children(|p| {
+                p.spawn(TextBundle {
+                    text: Text::from_section(
+                        text,
+                        TextStyle {
+                            font: font.clone(),
+                            font_size: 30.0,
+                            color: Color::DARK_GRAY,
+                        },
+                    ),
+                    style: Style {
+                        align_self: AlignSelf::Center,
+                        ..default()
                     },
-                ),
-                style: Style {
-                    align_self: AlignSelf::Center,
                     ..default()
-                },
-                ..default()
+                });
             });
-        });
     }
 }
 
-
 #[derive(Component, Default)]
 struct StartGameButton;
-
 
 #[derive(Component, Default)]
 struct SettingsButton;
@@ -80,15 +89,15 @@ struct SettingsButton;
 impl Page for TitlePage {
     type SelfType = Self;
 
-    fn name() -> &'static str { "title" }
+    fn name() -> &'static str {
+        "title"
+    }
     fn state() -> GameState {
         GameState::Title
     }
 
     fn build(app: &mut App) {
-        app.add_systems(OnEnter(Self::state()), (
-            Self::setup,
-        ));
+        app.add_systems(OnEnter(Self::state()), (Self::setup,));
 
         app.add_systems(
             Update,
@@ -96,8 +105,8 @@ impl Page for TitlePage {
                 Self::start.run_if(on_click::<StartGameButton>),
                 Self::settings.run_if(on_click::<SettingsButton>),
                 button_state,
-            ).run_if(in_state(Self::state())),
+            )
+                .run_if(in_state(Self::state())),
         );
     }
 }
-

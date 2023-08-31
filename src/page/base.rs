@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::GameState;
+use bevy::prelude::*;
 
 pub trait Page {
     type SelfType: 'static + Component + Page;
@@ -19,9 +19,6 @@ pub trait Page {
         Self::build(app);
         app
             // 离开页面时，执行 teardown 方法
-            .add_systems(OnExit(Self::state()), (
-                Self::SelfType::teardown,
-            ));
+            .add_systems(OnExit(Self::state()), (Self::SelfType::teardown,));
     }
 }
-
