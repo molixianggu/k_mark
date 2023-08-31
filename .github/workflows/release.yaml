@@ -11,11 +11,10 @@ on:
         required: true
         type: string
 
-# ToDo: adapt names
 env:
   # heads-up: this value is used as a pattern in an sed command as a workaround for a trunk issue
   #   if you use special characters, take a look at the 'Make paths relative' step in the 'build-web' job
-  GAME_EXECUTABLE_NAME: bevy_game
+  GAME_EXECUTABLE_NAME: k_mark
   GAME_OSX_APP_NAME: BevyGame
 
 permissions:
