@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::winit::WinitWindows;
 use bevy::DefaultPlugins;
-use bevy_game::GamePlugin; // ToDo: Replace bevy_game with your new crate name.
+use k_mark::GamePlugin;
 use std::io::Cursor;
 use std::time::Duration;
 use bevy::asset::ChangeWatcher;
@@ -17,7 +17,7 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.4, 0.4, 0.4)))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: "Bevy game".to_string(), // ToDo
+                title: "知痕".to_string(),
                 resolution: (800., 600.).into(),
                 // Bind to canvas included in `index.html`
                 canvas: Some("#bevy".to_owned()),
