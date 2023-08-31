@@ -15,12 +15,28 @@ impl GamePage {
         commands.spawn(
             (
                 MaterialMesh2dBundle {
-                    mesh: meshes.add(shape::Quad::new(Vec2::new(100., 100.)).into()).into(),
+                    mesh: meshes.add(shape::Quad::new(Vec2::new(300., 300.)).into()).into(),
                     material: custom_materials.add(CustomMaterial {
                         fill_amount: 1.0,
-                        color: Color::WHITE.into(),
+                        color: Color::RED.into(),
                         texture: texture.texture_bevy.clone(),
                     }),
+                    transform: Transform::from_translation(Vec3::new(-150., 0., 0.)),
+                    ..default()
+                },
+                Self,
+            )
+        );
+        commands.spawn(
+            (
+                MaterialMesh2dBundle {
+                    mesh: meshes.add(shape::Quad::new(Vec2::new(300., 300.)).into()).into(),
+                    material: custom_materials.add(CustomMaterial {
+                        fill_amount: 1.0,
+                        color: Color::GREEN.into(),
+                        texture: texture.texture_bevy.clone(),
+                    }),
+                    transform: Transform::from_translation(Vec3::new(150., 0., 0.)),
                     ..default()
                 },
                 Self,
