@@ -3,7 +3,7 @@
 
 use bevy::asset::ChangeWatcher;
 use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
+use bevy::window::{PrimaryWindow, WindowMode};
 use bevy::winit::WinitWindows;
 use bevy::DefaultPlugins;
 use k_mark::GamePlugin;
@@ -15,12 +15,13 @@ fn main() {
     App::new()
         .insert_resource(Msaa::Off)
         .insert_resource(ClearColor(Color::rgb(0.4, 0.4, 0.4)))
-        .add_plugins(
+        .add_plugins((
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
+                        mode: WindowMode::Fullscreen,
                         title: "知痕".to_string(),
-                        resolution: (800., 600.).into(),
+                        // resolution: (800., 600.).into(),
                         // Bind to canvas included in `index.html`
                         canvas: Some("#bevy".to_owned()),
                         // Tells wasm not to override default event handling, like F5 and Ctrl+R
@@ -32,9 +33,10 @@ fn main() {
                 .set(AssetPlugin {
                     watch_for_changes: ChangeWatcher::with_delay(Duration::from_millis(200)),
                     ..default()
-                }),
-        )
-        .add_plugins(GamePlugin)
+                })
+                .set(ImagePlugin::default_nearest()),
+            GamePlugin,
+        ))
         .add_systems(Startup, set_window_icon)
         .run();
 }

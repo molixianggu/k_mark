@@ -26,11 +26,12 @@ impl Plugin for GamePlugin {
         app.add_state::<GameState>()
             .add_plugins((loader::AssetLoadPlugin, page::PagePlugin::new()));
 
-        #[cfg(debug_assertions)]
+        #[cfg(debug_assertions) ]
         {
             app.add_plugins((
-                bevy::diagnostic::FrameTimeDiagnosticsPlugin,
-                bevy::diagnostic::LogDiagnosticsPlugin::default(),
+                // bevy::diagnostic::FrameTimeDiagnosticsPlugin,
+                // bevy::diagnostic::LogDiagnosticsPlugin::default(),
+                bevy_inspector_egui::quick::WorldInspectorPlugin::new(),
             ));
         }
     }
