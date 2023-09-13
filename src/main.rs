@@ -3,7 +3,7 @@
 
 use bevy::asset::ChangeWatcher;
 use bevy::prelude::*;
-use bevy::window::{PrimaryWindow, WindowMode};
+use bevy::window::PrimaryWindow;
 use bevy::winit::WinitWindows;
 use bevy::DefaultPlugins;
 use k_mark::GamePlugin;
@@ -19,7 +19,7 @@ fn main() {
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        mode: WindowMode::Fullscreen,
+                        // mode: bevy::window::WindowMode::Fullscreen,
                         title: "知痕".to_string(),
                         // resolution: (800., 600.).into(),
                         // Bind to canvas included in `index.html`
