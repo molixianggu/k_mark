@@ -1,5 +1,5 @@
 use crate::loader::texture::TextureAssets;
-use crate::package::tile::{TileMapBundle, TileMaterial};
+use crate::package::tile::{Light, TileMapBundle, TileMaterial};
 use crate::page::base::Page;
 use crate::systems::button::button_state;
 use crate::{Action, GameState};
@@ -22,16 +22,45 @@ impl GamePage {
         mut tile_materials: ResMut<Assets<TileMaterial>>,
         mut images: ResMut<Assets<Image>>,
     ) {
+        let obs = images.add(TileMapBundle::data_to_1d_texture(
+            // (-40..40).map(
+            //     |x| Vec2::new((x as f32).abs(), (1600. - (x as f32) * (x as f32)).powf(0.5))
+            // ).collect(),
+            vec![
+                Vec2::new(-50., 50.),
+                Vec2::new(-50., -50.),
+                Vec2::new(50., -50.),
+                Vec2::new(50., 50.),
+            ],
+            4,
+        ));
+
+        let lights = [
+            Light {
+                position: Vec2::new(0., 0.),
+                color: Vec3::new(1., 1., 1.),
+                radius: 100.,
+                intensity: 40.,
+            },
+            Light {
+                position: Vec2::new(100., -55.),
+                color: Vec3::new(1., 1., 1.),
+                radius: 100.,
+                intensity: 40.,
+            },
+        ];
         commands.spawn((
             MaterialMesh2dBundle {
                 mesh: meshes
                     .add(shape::Quad::new(Vec2::new(64., 64.)).into())
                     .into(),
                 material: custom_materials.add(CustomMaterial {
-                    fill_amount: 1.0,
-                    color: Color::RED.into(),
+                    lights: lights.clone(),
+                    light_count: 2,
+                    color: Color::WHITE.into(),
                     texture: texture.moko.clone(),
                     index: 0,
+                    obstacle: obs.clone(),
                 }),
                 transform: Transform::from_translation(Vec3::new(-150., 0., 0.1)),
                 ..default()
@@ -55,21 +84,23 @@ impl GamePage {
             Self,
         ));
         let img = images.add(TileMapBundle::data_to_map(
-            (0..30).map(|x| (x as f32) / 1000.0).collect(),
-            UVec2::new(6, 5),
+            (0..50).map(|x| (x as f32)).collect(),
+            UVec2::new(10, 5),
         ));
         commands.spawn((
             TileMapBundle::new(
                 meshes
-                    .add(shape::Quad::new(Vec2::new(320., 320.)).into())
+                    .add(shape::Quad::new(Vec2::new(640., 320.)).into())
                     .into(),
                 tile_materials.add(TileMaterial {
                     color: Color::WHITE.into(),
                     texture_shape: Vec2::new(16., 12.),
-                    size: Vec2 { x: 6., y: 5. },
-                    map: [Vec4::new(0., 0., 0., 0.); 16],
+                    lights: lights.clone(),
+                    light_count: 2,
+                    size: Vec2 { x: 10., y: 5. },
                     map_data: img.clone(),
                     texture: texture.tile_a1.clone(),
+                    obstacle: obs.clone(),
                 }),
                 Transform::from_translation(Vec3::new(100., 100., 0.)),
             ),
@@ -85,7 +116,24 @@ impl GamePage {
     ) {
         for cm in &query {
             if let Some(m) = materials.get_mut(cm) {
-                m.fill_amount = (time.elapsed_seconds().sin() / 2. + 0.5) * 400.0 - 200.0;
+                m.lights[0].position = Vec2::new(
+                    (time.elapsed_seconds().sin() / 2. + 0.5) * 400.0 - 200.0,
+                    100.0,
+                );
+            }
+        }
+    }
+    fn update_material2(
+        query: Query<&Handle<TileMaterial>>,
+        time: Res<Time>,
+        mut materials: ResMut<Assets<TileMaterial>>,
+    ) {
+        for cm in &query {
+            if let Some(m) = materials.get_mut(cm) {
+                m.lights[0].position = Vec2::new(
+                    (time.elapsed_seconds().sin() / 2. + 0.5) * 400.0 - 200.0,
+                    100.0,
+                );
             }
         }
     }
@@ -143,7 +191,9 @@ impl GamePage {
 #[uuid = "5b5569c8-36d4-4c9d-acb7-d1754b385ab2"]
 struct CustomMaterial {
     #[uniform(0)]
-    fill_amount: f32,
+    lights: [Light; 2],
+    #[uniform(0)]
+    light_count: u32,
     #[uniform(0)]
     color: Vec4,
     #[uniform(0)]
@@ -151,11 +201,13 @@ struct CustomMaterial {
     #[texture(1)]
     #[sampler(2)]
     pub texture: Handle<Image>,
+    #[texture(3)]
+    pub obstacle: Handle<Image>,
 }
 
 impl Material2d for CustomMaterial {
     fn fragment_shader() -> ShaderRef {
-        "shaders/circle_shader.wgsl".into()
+        "shaders/player_shader.wgsl".into()
     }
 }
 
@@ -173,7 +225,12 @@ impl Page for GamePage {
         app.add_systems(OnEnter(Self::state()), Self::setup);
         app.add_systems(
             Update,
-            (Self::update_material, Self::move_player, button_state)
+            (
+                Self::update_material,
+                Self::update_material2,
+                Self::move_player,
+                button_state,
+            )
                 .run_if(in_state(Self::state())),
         );
         app.add_plugins(Material2dPlugin::<CustomMaterial>::default());
