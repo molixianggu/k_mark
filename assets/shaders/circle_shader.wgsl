@@ -3,6 +3,7 @@
 struct CustomMaterial {
     fill_amount: f32,
     color: vec4<f32>,
+    index: u32,
 };
 
 @group(1) @binding(0)
@@ -13,29 +14,6 @@ var my_texture: texture_2d<f32>;
 
 @group(1) @binding(2)
 var my_sampler: sampler;
-
-// 判断两点连线是否与四边形相交
-// fn ray_cross(shape: array<vec2<f32>, 4>, light_point: vec2, target_point: vec2) -> f32 {
-//     for i in range(0, 4) {
-//         let p1: vec2<f32> = shape[i];
-//         let p2: vec2<f32> = shape[(i + 1) % 4];
-
-//         let v1: vec2<f32> = p2 - p1;
-//         let v2: vec2<f32> = light_point - target_point;
-
-//         let cross1: f32 = cross(v1, v2);
-//         let cross2: f32 = cross(v2, v3);
-
-//         if cross1 * cross2 < 0.0 {
-//             return 0.0;
-//         }
-//     }
-//     return 1.0;
-// }
-
-// fn crossx(v1: vec2<f32>, v2: vec2<f32>) -> f32 {
-//     return v1.x * v2.y - v1.y * v2.x;
-// }
 
 const EPSINON = 1e-5;
 
@@ -57,7 +35,7 @@ fn is_intersect(a: vec2<f32>, b: vec2<f32>, c: vec2<f32>, d: vec2<f32>) -> bool 
     return true;
 }
 
-
+// 判断两点连线是否与四边形相交
 fn ray_cross(shape: array<vec2<f32>, 4>, light_point: vec2<f32>, target_point: vec2<f32>) -> bool {
     return 
         is_intersect(light_point, target_point, shape[0], shape[1]) ||
@@ -81,7 +59,11 @@ fn fragment(
     let target_point: vec2<f32> = vec2<f32>(material.fill_amount, 100.0);
     let light_point: vec2<f32> = mesh.world_position.xy;
 
-    let tex_color: vec4<f32> = textureSample(my_texture, my_sampler, mesh.uv * vec2(1.0, -1.0) + vec2(0.0, 1.0));
+    let tex_color: vec4<f32> = textureSample(
+        my_texture, 
+        my_sampler, 
+        mesh.uv * vec2(1.0/3.0, 1.0/12.0) + vec2(f32(material.index % 3u) * (1.0 / 3.0), f32(material.index / 3u) * (1.0 / 12.0))
+    );
 
     var pow = 0.0;
 
@@ -95,5 +77,5 @@ fn fragment(
     let brightness: f32 = (pow / d ) + 0.05;
 
     
-    return vec4<f32>((tex_color * brightness * material.color).xyz, 1.0);
+    return vec4<f32>((tex_color * brightness).xyz, tex_color.a);
 }
